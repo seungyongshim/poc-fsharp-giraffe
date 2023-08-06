@@ -4,18 +4,21 @@ open Giraffe
 open Microsoft.AspNetCore.Http
 open System.Diagnostics
 
+[<CLIMutable>]
+type Car = {
+    Hello : string
+}
+
 let webapp =
     choose [
         GET >=> choose [
-            route "/"
-            >=> setStatusCode 201
-            >=> json {|
+            route "/" >=> setStatusCode 201 >=> json {|
                 hello = "world"
             |}
         ]
         POST >=> choose [
-            route "/t"
-            >=> handleContext(fun ctx -> task {
+            route "/t" >=> handleContext(fun ctx -> task {
+                let! car = ctx.TryBindFormAsync<Car>()
                 return! ctx.WriteJsonAsync({|
                     traceId = Activity.Current.Id
                 |})
