@@ -1,25 +1,19 @@
-namespace WebApplication1
-
 open Microsoft.AspNetCore.Http
-#nowarn "20"
 open Microsoft.AspNetCore.Builder
-open Microsoft.Extensions.Hosting
+open System
 
-module Program =
+[<EntryPoint>]
+let main args =
+    let builder = WebApplication.CreateBuilder(args)
+    let app = builder.Build()
 
-    [<EntryPoint>]
-    let main args =
+    app.MapGet("/help", Func<_,_>(fun http -> task {
+        let result = Results.Ok({|
+            helo = "Helo"
+        |})
+        do! result.ExecuteAsync(http)
+    })).WithName("help") |> ignore
 
-        let builder = WebApplication.CreateBuilder(args)
-        let app = builder.Build()
+    app.RunAsync() |> Async.AwaitTask |> Async.RunSynchronously
 
-        app.MapGet("/help",  new RequestDelegate(fun http -> task {
-            let result = Results.Ok({|
-                helo = "Helo"
-            |})
-            do! result.ExecuteAsync(http)
-        }))
-
-        app.Run()
-
-        0
+    0
